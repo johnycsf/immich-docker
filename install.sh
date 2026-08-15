@@ -3,11 +3,9 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
-
-need() { command -v "$1" >/dev/null || { echo "Missing: $1" >&2; exit 1; }; }
-need docker
-need openssl
-docker compose version >/dev/null
+# shellcheck source=deps.sh
+source "${ROOT}/deps.sh"
+ensure_host_deps docker
 
 if [[ ! -f .env ]]; then
   cp .env.example .env

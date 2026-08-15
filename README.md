@@ -10,9 +10,11 @@ Uses **Immich’s official images** from GHCR (`immich-server`, `immich-machine-
 
 ## What you need
 
-- Docker with Compose plugin
-- `openssl` and `curl` (used by `install.sh` / health checks)
-- Enough disk for your photo library (plan ahead — libraries grow)
+- A Linux host (Debian/Ubuntu, Fedora/RHEL, Arch, openSUSE, Alpine) or macOS with Homebrew
+- `sudo` so `./install.sh` can install missing tools (Docker, curl, openssl, rsync, …)
+- Enough disk for your data
+
+`./install.sh` detects your OS and installs host dependencies automatically.
 
 ## Install
 
