@@ -1,5 +1,7 @@
 # immich-docker
 
+![Repobeats analytics image](https://repobeats.axiom.co/api/embed/6eb113db43e751a25bbb31fc7f828245cf261118.svg "Repobeats analytics image")
+
 Deploy [Immich](https://immich.app/) (self-hosted photo and video backup) with Docker Compose.
 
 Kubernetes version: [immich-k8s](https://github.com/johnycsf/immich-k8s)
