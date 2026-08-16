@@ -2,21 +2,36 @@
 
 Thanks for wanting to help. These projects are meant to stay simple for homelab beginners.
 
-## How to contribute
+## Disclaimer
+
+See [DISCLAIMER.md](DISCLAIMER.md). By using or contributing to this repository, you acknowledge that the author is **not responsible** for any damage, data loss, outages, security issues, or other consequences from using this software.
+
+## Reporting bugs
+
+If you encounter an error or unexpected behavior, please use GitHub (that is the supported contribution path):
+
+1. Search [existing Issues](../../issues) for a duplicate.
+2. Open a **new Issue** and include:
+   - What you were trying to do
+   - Exact commands you ran
+   - Full error output
+   - OS and relevant tool versions (for example Docker / Compose, kubectl / Helm, or shell / Starship when applicable)
+   - Whether you used `./install.sh`, `./manage.sh`, or manual steps
+3. Optionally open a **Pull Request** with a fix (see below).
+
+Do not expect private email or DM troubleshooting. Bug reports and fixes belong on GitHub Issues and Pull Requests.
+
+## How to contribute (Pull Requests)
 
 1. Fork the repository
 2. Create a branch for your change
 3. Make the smallest change that solves the problem
-4. Test with Docker Compose on a real machine when changing compose/install scripts
+4. Test on a real machine when changing install or deploy scripts
 5. Open a Pull Request that explains what broke, what you changed, and how you verified it
 
 ## Guidelines
 
 - Prefer clarity over cleverness
-- Keep one-command installs working (`./install.sh` where present)
+- Keep one-command installs working (`./install.sh` / `./manage.sh` where present)
 - Do not commit secrets, tokens, or personal hostnames/IPs
 - Match existing file style
-
-## Issues
-
-Include Docker/Compose version, the command you ran, and error output.
