@@ -20,6 +20,8 @@ else
   ui_ok "Using existing .env"
 fi
 
+configure_host_port IMMICH_PORT "Immich HTTP" 2283
+
 if grep -q '^DB_PASSWORD=CHANGE_ME' .env; then
   PASS="$(openssl rand -base64 36 | tr -d '\n/+=\n' | tr -cd 'A-Za-z0-9' | head -c 32)"
   sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=${PASS}|" .env

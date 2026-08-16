@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Install prompts for host ports with conflict detection (keep defaults or choose custom).
+
 - Optional age-encrypted backup exports (`--encrypt`) for offsite disaster recovery.
 
 # Changelog
