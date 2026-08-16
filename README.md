@@ -2,11 +2,24 @@
 
 ![Repobeats analytics image](https://repobeats.axiom.co/api/embed/6eb113db43e751a25bbb31fc7f828245cf261118.svg "Repobeats analytics image")
 
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/johnycsf)
+
 Deploy [Immich](https://immich.app/) (self-hosted photo and video backup) with Docker Compose.
 
 Kubernetes version: [immich-k8s](https://github.com/johnycsf/immich-k8s)
 
 Uses **Immich’s official images** from GHCR (`immich-server`, `immich-machine-learning`, Immich Postgres with VectorChord) plus **Valkey** — the Redis-compatible cache Immich ships in their [official install compose](https://docs.immich.app/install/docker-compose). No LinuxServer or unofficial Immich forks.
+
+
+## Why this repo (not just another compose file)
+
+- **`./manage.sh`** control center — install, update, backup, status/doctor, uninstall
+- Interactive colored install with step progress
+- Auto-detects your OS and installs missing host tools
+- Safe **`./update.sh`** with automatic pre-update backup
+- Incremental hardlink **`./backup.sh`** + restore
+- **Official upstream images only**
 
 ## What you need
 
@@ -21,8 +34,9 @@ Uses **Immich’s official images** from GHCR (`immich-server`, `immich-machine-
 ```bash
 git clone https://github.com/johnycsf/immich-docker.git
 cd immich-docker
-chmod +x install.sh
-./install.sh
+chmod +x manage.sh install.sh
+./manage.sh          # interactive control center
+# or: ./install.sh
 ```
 
 Open the URL the script prints, create your admin account, then use the Immich mobile apps.
@@ -88,3 +102,12 @@ rm -rf data
 
 - Follow Immich release notes when jumping major versions.
 - Hardware acceleration for ML/transcoding is optional; see Immich docs and the commented `hwaccel` examples in upstream compose if you need them later.
+
+## Support this work
+
+If these homelab tools save you time, please consider sponsoring:
+
+[![Sponsor johnycsf](https://img.shields.io/badge/GitHub%20Sponsors-Donate-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/johnycsf)
+
+👉 **[github.com/sponsors/johnycsf](https://github.com/sponsors/johnycsf)** — tips and monthly support keep these beginner-friendly stacks maintained.
+
