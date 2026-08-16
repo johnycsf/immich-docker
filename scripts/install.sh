@@ -46,7 +46,9 @@ ui_run "compose pull" compose pull
 ui_step "Starting Immich stack"
 ui_run "compose up -d" compose up -d
 
-ensure_host_owned_dir data/library data/postgres data/model-cache data/redis
+# Library/model-cache are host-rsync targets. Do NOT chown postgres/redis after
+# start — container UIDs own those dirs (especially under rootless Podman).
+ensure_host_owned_dir data/library data/model-cache
 
 ui_step "Waiting for API"
 PORT="$(grep -E '^IMMICH_PORT=' .env | cut -d= -f2 || echo 2283)"
