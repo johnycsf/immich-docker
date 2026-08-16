@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Safely update Immich (waits for full pull + healthy recreate).
-# Pre-update snapshot via ./backup.sh into ./backups (database-safe + incremental library).
+# Pre-update snapshot via ./manage.sh backup into ./backups (database-safe + incremental library).
 set -euo pipefail
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 # Long client timeouts so cron never aborts mid-pull
@@ -21,7 +21,7 @@ print_offsite_tip() {
 
 Tip: Local backups under backups/ can fill your disk (Immich library is large).
 Prefer --dest on an external drive/NAS for disaster copies, or copy backups/ off-box.
-Restore: ./backup.sh --restore --from ./backups
+Restore: ./manage.sh backup --restore --from ./backups
 EOF
 }
 
@@ -78,22 +78,22 @@ ask_backup_retention() {
       echo "${keep}" >"${KEEP_FILE}"
       prune_old_backups "${keep}"
       print_offsite_tip
-      echo "  Restore: ./backup.sh --restore --from ./backups"
+      echo "  Restore: ./manage.sh backup --restore --from ./backups"
       ;;
   esac
 }
 
 create_backup() {
-  if [[ ! -x "${ROOT}/backup.sh" ]]; then
+  if [[ ! -x "${ROOT}/scripts/backup.sh" ]]; then
     echo "Missing executable backup.sh" >&2
     exit 1
   fi
   local keep="${DEFAULT_KEEP}"
   [[ -f "${KEEP_FILE}" ]] && keep="$(tr -dc '0-9' <"${KEEP_FILE}" || true)"
   [[ -z "${keep}" ]] && keep="${DEFAULT_KEEP}"
-  echo "==> Pre-update snapshot via ./backup.sh --dest ${BACKUP_ROOT} ..."
+  echo "==> Pre-update snapshot via ./manage.sh backup --dest ${BACKUP_ROOT} ..."
   echo "    (Library uses hardlinks; first run can take a while.)"
-  "${ROOT}/backup.sh" --dest "${BACKUP_ROOT}" --keep "${keep}"
+  "${ROOT}/scripts/backup.sh" --dest "${BACKUP_ROOT}" --keep "${keep}"
   if [[ -L "${BACKUP_ROOT}/latest" ]]; then
     BACKUP_DIR="$(readlink -f "${BACKUP_ROOT}/latest")"
   else

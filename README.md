@@ -27,8 +27,8 @@ Uses **Immich’s official images** from GHCR (`immich-server`, `immich-machine-
 - **`./manage.sh`** control center — install, update, backup, status/doctor, uninstall
 - Interactive colored install with step progress
 - Auto-detects your OS and installs missing host tools
-- Safe **`./update.sh`** with automatic pre-update backup
-- Incremental hardlink **`./backup.sh`** + restore
+- Safe **`./manage.sh update`** with automatic pre-update backup
+- Incremental hardlink **`./manage.sh backup`** + restore
 - **Official upstream images only**
 
 ## Support this work
@@ -46,19 +46,19 @@ If this stack saved you setup time, please consider sponsoring — it funds:
 ## What you need
 
 - A Linux host (Debian/Ubuntu, Fedora/RHEL, Arch, openSUSE, Alpine) or macOS with Homebrew
-- `sudo` so `./install.sh` can install missing tools (Docker, curl, openssl, rsync, …)
+- `sudo` so `./manage.sh` can install missing tools (Docker, curl, openssl, rsync, …)
 - Enough disk for your data
 
-`./install.sh` is interactive (colors + step progress), detects your OS, and installs host dependencies automatically.
+`./manage.sh` is interactive (colors + step progress), detects your OS, and installs host dependencies automatically.
 
 ## Install
 
 ```bash
 git clone https://github.com/johnycsf/immich-docker.git
 cd immich-docker
-chmod +x manage.sh install.sh
+chmod +x manage.sh
 ./manage.sh          # interactive control center
-# or: ./install.sh
+# or: ./manage.sh
 ```
 
 Open the URL the script prints, create your admin account, then use the Immich mobile apps.
@@ -81,33 +81,30 @@ Edit `.env` (created from `.env.example`):
 ## Update
 
 ```bash
-chmod +x update.sh
-./update.sh
+./manage.sh update
 ```
 
-Before updating, the script runs `./backup.sh` into `./backups` (Postgres dump + incremental library hardlinks). Afterward it asks whether to keep that snapshot and how many copies to retain.
+Before updating, the script runs `./manage.sh backup` into `./backups` (Postgres dump + incremental library hardlinks). Afterward it asks whether to keep that snapshot and how many copies to retain.
 
 Roll back / disaster restore:
 
 ```bash
-./backup.sh --restore --from ./backups
+./manage.sh backup --restore --from ./backups
 # or from an external copy:
-./backup.sh --restore --from /mnt/usb/immich-backups
+./manage.sh backup --restore --from /mnt/usb/immich-backups
 ```
 
 ## Disaster recovery (full backup / restore)
 
 ```bash
-chmod +x backup.sh
-
 # Prefer an external drive or NAS (libraries are large; hardlinks need one filesystem)
-./backup.sh --dest /mnt/usb/immich-docker-backups --keep 3
+./manage.sh backup --dest /mnt/usb/immich-docker-backups --keep 3
 
 # Optional: also snapshot ML model cache
-./backup.sh --dest /mnt/usb/immich-docker-backups --keep 3 --include-model-cache
+./manage.sh backup --dest /mnt/usb/immich-docker-backups --keep 3 --include-model-cache
 
-# On a new machine after ./install.sh (or with compose present):
-./backup.sh --restore --from /mnt/usb/immich-docker-backups
+# On a new machine after ./manage.sh (or with compose present):
+./manage.sh backup --restore --from /mnt/usb/immich-docker-backups
 ```
 
 Each snapshot includes `SHA256SUMS` / `snapshot_sha256` for dumps and config. The photo library uses a fast size+path fingerprint (full per-file hashing of hundreds of GB would thrash the disk). Restore **warns** if integrity looks wrong but does not abort.
@@ -145,13 +142,13 @@ If you hit an error, please [open a GitHub Issue](../../issues/new/choose) and f
 
 ## Host ports
 
-During `./install.sh` (or Manage → Install / reconfigure), the script checks whether default host ports are free, lets you keep the defaults or choose different ports, and saves them in `.env`. Re-running install keeps your current ports unless you change them.
+During `./manage.sh` (or Manage → Install / reconfigure), the script checks whether default host ports are free, lets you keep the defaults or choose different ports, and saves them in `.env`. Re-running install keeps your current ports unless you change them.
 
 Non-interactive: set the port variables in `.env` (or the environment) and use `SKIP_PORT_PROMPTS=1`.
 
 ## Backup exports
 
-Local snapshots stay as incremental hardlink trees (fast rollback). Optionally create a compressed offsite copy with `./backup.sh --dest ./backups --archive tar.gz|tar.xz|zip` (add `--archive-password` for zip password or age-passphrase on tar). For stronger key-based encryption use `--encrypt` (age). See repo-framework `docs/BACKUP_ENCRYPTION.md`.
+Local snapshots stay as incremental hardlink trees (fast rollback). Optionally create a compressed offsite copy with `./manage.sh backup --dest ./backups --archive tar.gz|tar.xz|zip` (add `--archive-password` for zip password or age-passphrase on tar). For stronger key-based encryption use `--encrypt` (age). See repo-framework `docs/BACKUP_ENCRYPTION.md`.
 
 ## Security
 

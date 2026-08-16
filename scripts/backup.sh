@@ -5,10 +5,10 @@
 # - SHA256: full checksums for dumps/config; library uses a fast size+path fingerprint
 #   (full per-file hashing of hundreds of GB would take forever / thrash the disk)
 set -euo pipefail
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
-# shellcheck source=backup-encrypt.sh
-source "${ROOT}/backup-encrypt.sh"
+# shellcheck source=scripts/backup-encrypt.sh
+source "${ROOT}/scripts/backup-encrypt.sh"
 STACK_ID="immich-docker"
 
 need() { command -v "$1" >/dev/null || { echo "Missing: $1" >&2; exit 1; }; }
@@ -22,9 +22,9 @@ need_rsync() {
 usage() {
   cat <<'EOF'
 Usage:
-  ./backup.sh --dest /path/to/backup-root [--keep N] [--include-model-cache]
-  ./backup.sh --restore --from /path/to/backup-root-or-snapshot
-  ./backup.sh --help
+  ./manage.sh backup --dest /path/to/backup-root [--keep N] [--include-model-cache]
+  ./manage.sh backup --restore --from /path/to/backup-root-or-snapshot
+  ./manage.sh backup --help
 
   --dest DIR               Create incremental snapshot under DIR
   --keep N                 Keep only newest N snapshots after backup
@@ -37,7 +37,7 @@ Usage:
 
 Fresh machine:
   1) Place compose + .env here and docker compose up once (or restore .env from snapshot)
-  2) ./backup.sh --restore --from /mnt/usb/immich-backups
+  2) ./manage.sh backup --restore --from /mnt/usb/immich-backups
 EOF
 }
 

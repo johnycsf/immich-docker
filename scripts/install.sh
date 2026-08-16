@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # First-run Immich install (interactive) — official images + Valkey + Immich Postgres.
 set -euo pipefail
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
-# shellcheck source=deps.sh
-source "${ROOT}/deps.sh"
+# shellcheck source=scripts/deps.sh
+source "${ROOT}/scripts/deps.sh"
 
 ui_banner "Immich" "Docker Compose · official Immich images + Valkey + Postgres"
 ui_steps_init 5
@@ -58,7 +58,7 @@ ui_ok "Immich is starting"
 ui_info "Open: ${UI_BOLD}http://${IP}:${PORT}${UI_RESET}"
 ui_info "1) Create your admin account"
 ui_info "2) Install the Immich mobile app and point it at that URL"
-ui_info "3) Later: ./update.sh   ·   ./backup.sh --dest /path/to/external-drive"
+ui_info "3) Later: ./manage.sh update   ·   ./manage.sh backup --dest /path/to/external-drive"
 if [[ "$ok" -ne 1 ]]; then
   ui_warn "API not ready yet — wait a minute and refresh the URL"
   docker compose ps || true
