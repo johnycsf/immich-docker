@@ -141,7 +141,7 @@ If you hit an error, please [open a GitHub Issue](../../issues/new/choose) and f
 
 ## Interactive control center
 
-`./manage.sh` opens an **arrow-key menu** (↑↓ + Enter) powered by [gum](https://github.com/charmbracelet/gum). If gum isn’t installed yet, the script installs it automatically (or falls back to whiptail / a numbered list).
+`./manage.sh` opens a simple **↑/↓ menu** with a `>` cursor (j/k and Enter also work). No extra packages required.
 
 ## Host ports
 
@@ -149,9 +149,9 @@ During `./install.sh` (or Manage → Install / reconfigure), the script checks w
 
 Non-interactive: set the port variables in `.env` (or the environment) and use `SKIP_PORT_PROMPTS=1`.
 
-## Encrypted backups
+## Backup exports
 
-Local snapshots stay as incremental hardlink trees (fast rollback). For offsite/USB/NAS confidentiality, create an **age**-encrypted export (`./backup.sh --dest ./backups --encrypt`). SHA256 checksums cover integrity; age covers confidentiality. See upstream docs in repo-framework `docs/BACKUP_ENCRYPTION.md`.
+Local snapshots stay as incremental hardlink trees (fast rollback). Optionally create a compressed offsite copy with `./backup.sh --dest ./backups --archive tar.gz|tar.xz|zip` (add `--archive-password` for zip password or age-passphrase on tar). For stronger key-based encryption use `--encrypt` (age). See repo-framework `docs/BACKUP_ENCRYPTION.md`.
 
 ## Security
 
