@@ -705,6 +705,41 @@ compose() {
 }
 
 
+compose_service_running() {
+  # compose_service_running SERVICE
+  # True if SERVICE has a running container. Works with Docker Compose and
+  # podman-compose (which does not accept `ps -q SERVICE`).
+  local svc="${1:-}" project
+  [[ -n "${svc}" ]] || return 1
+  load_container_engine
+  case "${CONTAINER_ENGINE}" in
+    podman)
+      if command -v podman-compose >/dev/null 2>&1; then
+        project="${COMPOSE_PROJECT_NAME:-$(basename "${ROOT:-$PWD}")}"
+        if podman ps --filter "status=running" \
+            --filter "label=com.docker.compose.project=${project}" \
+            --filter "label=com.docker.compose.service=${svc}" \
+            --format '{{.ID}}' 2>/dev/null | grep -q .; then
+          return 0
+        fi
+        if podman ps --filter "status=running" \
+            --filter "label=io.podman.compose.project=${project}" \
+            --filter "label=io.podman.compose.service=${svc}" \
+            --format '{{.ID}}' 2>/dev/null | grep -q .; then
+          return 0
+        fi
+        return 1
+      fi
+      compose ps -q "${svc}" 2>/dev/null | grep -q .
+      ;;
+    *)
+      compose ps -q "${svc}" 2>/dev/null | grep -q .
+      ;;
+  esac
+}
+
+
+
 load_container_engine() {
   # Read remembered engine from .env (set at install) into the current shell.
   CONTAINER_ENGINE="$(_container_engine)"
