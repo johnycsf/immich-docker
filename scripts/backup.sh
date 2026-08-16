@@ -24,11 +24,11 @@ need_rsync() {
 usage() {
   cat <<'EOF'
 Usage:
-  ./manage.sh backup --dest /path/to/backup-root [--keep N] [--include-model-cache]
+  ./manage.sh backup --dest /mnt/backup [--keep N] [--include-model-cache]
   ./manage.sh backup --restore --from /path/to/backup-root-or-snapshot
   ./manage.sh backup --help
 
-  --dest DIR               Create incremental snapshot under DIR
+  --dest DIR               Backup root; writes to DIR/<stack-id>/snapshots/...
   --keep N                 Keep only newest N snapshots after backup
   --include-model-cache    Also snapshot data/model-cache (re-downloadable; optional)
   --restore --from PATH    Restore into this Immich install
@@ -322,7 +322,9 @@ do_backup() {
   compose version >/dev/null
   [[ -n "$DEST" ]] || { echo "Provide --dest /path" >&2; exit 1; }
   [[ -f .env ]] || { echo "No .env found." >&2; exit 1; }
+  DEST="$(resolve_stack_backup_dest "${STACK_ID}" "${DEST}")"
   DEST="$(mkdir -p "$DEST" && cd "$DEST" && pwd)"
+  echo "==> Stack backup root: ${DEST}"
   prepare_snapshot_dirs "$DEST"
   echo "==> Snapshot ${SNAP_NAME} -> ${SNAP_DIR}"
   echo "==> DB: logical PostgreSQL dump. Library: incremental rsync hardlinks."
@@ -392,6 +394,7 @@ do_restore() {
   need_rsync
   compose version >/dev/null
   [[ -n "$FROM" ]] || { echo "Provide --from /path" >&2; exit 1; }
+  FROM="$(resolve_stack_backup_from "${STACK_ID}" "${FROM}")"
   local snap src
   src="$(prepare_restore_from_arg "$FROM")"
   trap cleanup_restore_tmp EXIT
