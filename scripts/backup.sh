@@ -352,21 +352,26 @@ do_backup() {
   [[ -f .env ]] && cp -a .env "${SNAP_DIR}/"
   [[ -f docker-compose.yml ]] && cp -a docker-compose.yml "${SNAP_DIR}/"
 
-  echo "==> Syncing photo library (data/library) — may take a while on first run..."
+  local upload_rel="${UPLOAD_LOCATION:-./data/library}"
+  local upload_path model_rel model_path
+  upload_path="$(resolve_repo_path "${upload_rel}")"
+  echo "==> Syncing photo library (${upload_rel}) — may take a while on first run..."
   local prev_lib=""
   [[ -n "${PREV_LINK}" && -d "${PREV_LINK}/files/library" ]] && prev_lib="${PREV_LINK}/files/library"
-  if [[ -d data/library ]]; then
-    rsync_incremental "data/library" "${SNAP_DIR}/files/library" "${prev_lib}"
+  if [[ -d "${upload_path}" ]]; then
+    rsync_incremental "${upload_path}" "${SNAP_DIR}/files/library" "${prev_lib}"
   else
-    echo "data/library missing — refusing incomplete backup." >&2
+    echo "${upload_rel} missing — refusing incomplete backup." >&2
     exit 1
   fi
 
-  if [[ "${INCLUDE_MODEL_CACHE}" -eq 1 && -d data/model-cache ]]; then
-    echo "==> Syncing model-cache..."
+  model_rel="${MODEL_CACHE_LOCATION:-./data/model-cache}"
+  model_path="$(resolve_repo_path "${model_rel}")"
+  if [[ "${INCLUDE_MODEL_CACHE}" -eq 1 && -d "${model_path}" ]]; then
+    echo "==> Syncing model-cache (${model_rel})..."
     local prev_mc=""
     [[ -n "${PREV_LINK}" && -d "${PREV_LINK}/files/model-cache" ]] && prev_mc="${PREV_LINK}/files/model-cache"
-    rsync_incremental "data/model-cache" "${SNAP_DIR}/files/model-cache" "${prev_mc}"
+    rsync_incremental "${model_path}" "${SNAP_DIR}/files/model-cache" "${prev_mc}"
   fi
 
   cat >"${SNAP_DIR}/META.txt" <<EOF
@@ -376,8 +381,8 @@ host=$(hostname 2>/dev/null || echo unknown)
 note=immich library + verified postgres dump
 db_engine=postgresql
 db_method=pg_dump --clean
-library=data/library
-datadir_excluded=data/postgres (logical dump only)
+library=${upload_rel}
+datadir_excluded=${DB_DATA_LOCATION:-./data/postgres} (logical dump only)
 EOF
 
   trap - EXIT
@@ -432,31 +437,41 @@ EOF
   # shellcheck disable=SC1091
   set -a; source .env; set +a
   apply_host_install_env
+  # Prefer this install's layout over paths from another Immich tree (e.g. ./volume/*).
+  if [[ -z "${UPLOAD_LOCATION:-}" ]]; then
+    UPLOAD_LOCATION=./data/library
+    env_file_set UPLOAD_LOCATION "${UPLOAD_LOCATION}"
+    export UPLOAD_LOCATION
+  fi
+  if [[ -z "${DB_DATA_LOCATION:-}" ]]; then
+    DB_DATA_LOCATION=./data/postgres
+    env_file_set DB_DATA_LOCATION "${DB_DATA_LOCATION}"
+    export DB_DATA_LOCATION
+  fi
 
-  echo "==> Restoring library..."
-  mkdir -p data/library
-  ensure_host_owned_dir data/library
-  rsync -aH --delete --info=progress2 "${snap}/files/library/" data/library/
+  local upload_rel="${UPLOAD_LOCATION}"
+  local upload_path model_rel model_path
+  upload_path="$(resolve_repo_path "${upload_rel}")"
+  echo "==> Restoring library -> ${upload_rel}..."
+  mkdir -p "${upload_path}"
+  ensure_host_owned_dir "${upload_path}"
+  rsync -aH --delete --info=progress2 "${snap}/files/library/" "${upload_path}/"
 
   if [[ -d "${snap}/files/model-cache" ]]; then
-    echo "==> Restoring model-cache..."
-    mkdir -p data/model-cache
-    ensure_host_owned_dir data/model-cache
-    rsync -aH --delete "${snap}/files/model-cache/" data/model-cache/
+    model_rel="${MODEL_CACHE_LOCATION:-./data/model-cache}"
+    model_path="$(resolve_repo_path "${model_rel}")"
+    echo "==> Restoring model-cache -> ${model_rel}..."
+    mkdir -p "${model_path}"
+    ensure_host_owned_dir "${model_path}"
+    rsync -aH --delete "${snap}/files/model-cache/" "${model_path}/"
   fi
 
   echo "==> Rebuilding Postgres datadir and importing dump..."
   # Replace datadir so dump matches restored credentials
-  if [[ -n "${DB_DATA_LOCATION:-}" ]]; then
-    # resolve relative
-    local dbpath="${DB_DATA_LOCATION}"
-    [[ "$dbpath" == /* ]] || dbpath="${ROOT}/${dbpath#./}"
-    sudo rm -rf "${dbpath}"
-    mkdir -p "${dbpath}"
-  else
-    sudo rm -rf data/postgres
-    mkdir -p data/postgres
-  fi
+  local dbpath
+  dbpath="$(resolve_repo_path "${DB_DATA_LOCATION}")"
+  sudo rm -rf "${dbpath}"
+  mkdir -p "${dbpath}"
 
   compose up -d database
   echo "Waiting for Postgres..."
