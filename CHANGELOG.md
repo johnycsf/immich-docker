@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/) where tagged releases exist.
 
 ## [Unreleased]
+- Podman: prefer `podman-compose` over `podman compose`/docker-compose plugin; silence provider banner.
 - Clarify that `main` stays the GitHub default; log bugs as Issues during testing.
 - Document `testing` → `main` PR workflow (verify first, include CHANGELOG).
 - Install: do not chown `data/postgres`/`data/redis` after start (breaks container UIDs under Podman).
