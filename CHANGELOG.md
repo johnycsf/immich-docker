@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/) where tagged releases exist.
 
 ## [Unreleased]
+- Fix backup dump verification under `pipefail` (gzip|head SIGPIPE looked like a bad dump).
 - Fix Podman backup/status: detect running services without `compose ps -q SERVICE` (unsupported by podman-compose).
 - Restore preserves host `UPLOAD_LOCATION` / `DB_DATA_LOCATION` and syncs the library to that path (fixes empty `./volume/library` after restoring a snapshot whose `.env` used Immich's volume layout).
 - Backup `--dest` always nests under `<dest>/<STACK_ID>/` so multiple services share one disk without mixing.

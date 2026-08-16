@@ -188,7 +188,7 @@ sha256_file() {
 }
 
 verify_pg_dump() {
-  local f="$1"
+  local f="$1" sample=""
   if [[ ! -s "$f" ]]; then
     echo "PostgreSQL dump missing or empty: $f" >&2
     return 1
@@ -199,7 +199,10 @@ verify_pg_dump() {
       echo "PostgreSQL dump failed gzip integrity: $f" >&2
       return 1
     fi
-    if ! gzip -dc "$f" | head -c 200 | grep -qE 'PostgreSQL|pg_dump|CREATE|SET'; then
+    # Avoid `gzip | head | grep` under pipefail: head closes the pipe early (exit 141)
+    # even when the dump is valid SQL.
+    sample="$(gzip -dc "$f" 2>/dev/null | head -c 4096 || true)"
+    if ! grep -qE 'PostgreSQL|pg_dump|CREATE|SET' <<<"${sample}"; then
       echo "PostgreSQL dump does not look like SQL: $f" >&2
       return 1
     fi
