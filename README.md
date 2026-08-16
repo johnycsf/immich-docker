@@ -2,8 +2,9 @@
 
 ![Repobeats analytics image](https://repobeats.axiom.co/api/embed/6eb113db43e751a25bbb31fc7f828245cf261118.svg "Repobeats analytics image")
 
-
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/johnycsf)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Issues](https://img.shields.io/badge/issues-welcome-lightgrey.svg)](../../issues/new/choose)
 
 Deploy [Immich](https://immich.app/) (self-hosted photo and video backup) with Docker Compose.
 
@@ -11,6 +12,15 @@ Kubernetes version: [immich-k8s](https://github.com/johnycsf/immich-k8s)
 
 Uses **Immich’s official images** from GHCR (`immich-server`, `immich-machine-learning`, Immich Postgres with VectorChord) plus **Valkey** — the Redis-compatible cache Immich ships in their [official install compose](https://docs.immich.app/install/docker-compose). No LinuxServer or unofficial Immich forks.
 
+**One-command Immich for homelab beginners** — official images, interactive install, safe updates & backups.
+
+> **Choose your path:** **Docker Compose (this repo)** · [Kubernetes](https://github.com/johnycsf/immich-k8s)
+
+## Who this is for
+
+**Good fit:** homelab beginners who want Immich with official images and a guided install/update/backup flow.
+
+**Not for:** production multi-tenant photo hosting, or forks/unofficial Immich images — this stack sticks to Immich’s official GHCR images.
 
 ## Why this repo (not just another compose file)
 
@@ -20,6 +30,18 @@ Uses **Immich’s official images** from GHCR (`immich-server`, `immich-machine-
 - Safe **`./update.sh`** with automatic pre-update backup
 - Incremental hardlink **`./backup.sh`** + restore
 - **Official upstream images only**
+
+## Support this work
+
+If this stack saved you setup time, please consider sponsoring — it funds:
+
+- Keeping install/update/backup scripts working across common Linux distros
+- Testing safe upgrades against **official** upstream images
+- Building more beginner-friendly stacks that share the same `./manage.sh` UX
+
+[![Sponsor johnycsf](https://img.shields.io/badge/GitHub%20Sponsors-Donate-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/johnycsf)
+
+👉 **[github.com/sponsors/johnycsf](https://github.com/sponsors/johnycsf)**
 
 ## What you need
 
@@ -40,6 +62,8 @@ chmod +x manage.sh install.sh
 ```
 
 Open the URL the script prints, create your admin account, then use the Immich mobile apps.
+
+Liked the install? Star the repo or [sponsor johnycsf](https://github.com/sponsors/johnycsf) so more stacks stay maintained.
 
 ## Customize
 
@@ -115,11 +139,6 @@ This project is provided **as is**. The author is **not responsible** for any lo
 
 If you hit an error, please [open a GitHub Issue](../../issues/new/choose) and follow [CONTRIBUTING.md](CONTRIBUTING.md). Fixes via Pull Request are welcome. GitHub Issues/PRs are the supported way to report problems—there is no private support channel.
 
-## Support this work
+## Security
 
-If these homelab tools save you time, please consider sponsoring:
-
-[![Sponsor johnycsf](https://img.shields.io/badge/GitHub%20Sponsors-Donate-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/johnycsf)
-
-👉 **[github.com/sponsors/johnycsf](https://github.com/sponsors/johnycsf)** — tips and monthly support keep these beginner-friendly stacks maintained.
-
+See [SECURITY.md](SECURITY.md) for how to report vulnerabilities.
