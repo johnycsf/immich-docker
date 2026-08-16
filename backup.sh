@@ -7,6 +7,8 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
+# shellcheck source=backup-encrypt.sh
+source "${ROOT}/backup-encrypt.sh"
 STACK_ID="immich-docker"
 
 need() { command -v "$1" >/dev/null || { echo "Missing: $1" >&2; exit 1; }; }
@@ -25,7 +27,17 @@ Usage:
   ./backup.sh --help
 
   --dest DIR               Create incremental snapshot under DIR
-  --keep N                 Keep only newest N snapshots after backup
+  --keep N
+  --encrypt          After snapshot, also write an age-encrypted .tar.age export
+                     (local hardlink snapshot stays plaintext for incrementals).
+  --export-dir DIR   Where to put *.tar.age (default: DEST/encrypted).
+  --age-recipient R  age1… public key or path to recipients file (repeatable).
+  --age-identity F   Private key file for decrypt (default: ~/.config/johnycsf/backup.age.key).
+  --passphrase       Encrypt export with a passphrase (age -p) instead of a recipient key.
+
+  SHA256SUMS = integrity. age = confidentiality for offsite/USB/NAS copies.
+  Restore: --from may be a snapshot dir/root OR a *.tar.age / *.age export.
+  --keep N_PLACEHOLDER_REMOVE                 Keep only newest N snapshots after backup
   --include-model-cache    Also snapshot data/model-cache (re-downloadable; optional)
   --restore --from PATH    Restore into this Immich install
 
@@ -39,6 +51,12 @@ MODE=""
 DEST=""
 FROM=""
 KEEP=""
+
+ENCRYPT="${BACKUP_ENCRYPT:-0}"
+EXPORT_DIR="${BACKUP_EXPORT_DIR:-}"
+ENCRYPT_PASSPHRASE=0
+AGE_RECIPIENTS=()
+AGE_IDENTITY="${BACKUP_AGE_IDENTITY:-}"
 INCLUDE_MODEL_CACHE=0
 
 while [[ $# -gt 0 ]]; do
@@ -50,6 +68,19 @@ while [[ $# -gt 0 ]]; do
       [[ $# -ge 2 ]] || { echo "--from needs a path" >&2; exit 1; }
       FROM="$2"; shift 2 ;;
     --restore) MODE="restore"; shift ;;
+    --encrypt)
+      ENCRYPT=1; shift ;;
+    --export-dir)
+      [[ $# -ge 2 ]] || { echo "--export-dir needs a path" >&2; exit 1; }
+      EXPORT_DIR="$2"; shift 2 ;;
+    --age-recipient)
+      [[ $# -ge 2 ]] || { echo "--age-recipient needs a value" >&2; exit 1; }
+      AGE_RECIPIENTS+=("$2"); shift 2 ;;
+    --age-identity)
+      [[ $# -ge 2 ]] || { echo "--age-identity needs a path" >&2; exit 1; }
+      AGE_IDENTITY="$2"; shift 2 ;;
+    --passphrase)
+      ENCRYPT=1; ENCRYPT_PASSPHRASE=1; shift ;;
     --keep)
       [[ $# -ge 2 ]] || { echo "--keep needs a number" >&2; exit 1; }
       KEEP="$2"; shift 2 ;;
@@ -346,6 +377,7 @@ EOF
 
   trap - EXIT
   seal_snapshot "${SNAP_DIR}"
+  maybe_encrypt_after_seal
   finalize_snapshot "$DEST"
   prune_snapshots "$DEST" "${KEEP}"
   echo
@@ -357,8 +389,10 @@ do_restore() {
   need_rsync
   docker compose version >/dev/null
   [[ -n "$FROM" ]] || { echo "Provide --from /path" >&2; exit 1; }
-  local snap
-  snap="$(resolve_snapshot_dir "$FROM")"
+  local snap src
+  src="$(prepare_restore_from_arg "$FROM")"
+  trap cleanup_restore_tmp EXIT
+  snap="$(resolve_snapshot_dir "$src")"
   echo "Restoring from: $snap"
   verify_snapshot_integrity "$snap"
   [[ -f "${snap}/immich-db.sql.gz" || -f "${snap}/immich-db.sql" ]] || {
