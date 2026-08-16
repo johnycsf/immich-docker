@@ -27,19 +27,13 @@ Usage:
   ./backup.sh --help
 
   --dest DIR               Create incremental snapshot under DIR
-  --keep N
-  --encrypt          After snapshot, also write an age-encrypted .tar.age export
-                     (local hardlink snapshot stays plaintext for incrementals).
-  --export-dir DIR   Where to put *.tar.age (default: DEST/encrypted).
-  --age-recipient R  age1… public key or path to recipients file (repeatable).
-  --age-identity F   Private key file for decrypt (default: ~/.config/johnycsf/backup.age.key).
-  --passphrase       Encrypt export with a passphrase (age -p) instead of a recipient key.
-
-  SHA256SUMS = integrity. age = confidentiality for offsite/USB/NAS copies.
-  Restore: --from may be a snapshot dir/root OR a *.tar.age / *.age export.
-  --keep N_PLACEHOLDER_REMOVE                 Keep only newest N snapshots after backup
+  --keep N                 Keep only newest N snapshots after backup
   --include-model-cache    Also snapshot data/model-cache (re-downloadable; optional)
   --restore --from PATH    Restore into this Immich install
+
+  Optional offsite exports (see README / repo-framework docs/BACKUP_ENCRYPTION.md):
+  --archive tar.gz|tar.xz|zip [--archive-password]
+  --encrypt [--export-dir DIR] [--age-recipient R] [--passphrase]
 
 Fresh machine:
   1) Place compose + .env here and docker compose up once (or restore .env from snapshot)
@@ -55,6 +49,8 @@ KEEP=""
 ENCRYPT="${BACKUP_ENCRYPT:-0}"
 EXPORT_DIR="${BACKUP_EXPORT_DIR:-}"
 ENCRYPT_PASSPHRASE=0
+ARCHIVE_FORMAT="${BACKUP_ARCHIVE:-}"
+ARCHIVE_PASSWORD="${BACKUP_ARCHIVE_PASSWORD:-0}"
 AGE_RECIPIENTS=()
 AGE_IDENTITY="${BACKUP_AGE_IDENTITY:-}"
 INCLUDE_MODEL_CACHE=0
@@ -68,6 +64,11 @@ while [[ $# -gt 0 ]]; do
       [[ $# -ge 2 ]] || { echo "--from needs a path" >&2; exit 1; }
       FROM="$2"; shift 2 ;;
     --restore) MODE="restore"; shift ;;
+    --archive)
+      [[ $# -ge 2 ]] || { echo "--archive needs tar.gz|tar.xz|zip" >&2; exit 1; }
+      ARCHIVE_FORMAT="$2"; shift 2 ;;
+    --archive-password)
+      ARCHIVE_PASSWORD=1; shift ;;
     --encrypt)
       ENCRYPT=1; shift ;;
     --export-dir)
