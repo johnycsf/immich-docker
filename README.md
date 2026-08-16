@@ -14,7 +14,7 @@ Uses **Immich’s official images** from GHCR (`immich-server`, `immich-machine-
 - `sudo` so `./install.sh` can install missing tools (Docker, curl, openssl, rsync, …)
 - Enough disk for your data
 
-`./install.sh` detects your OS and installs host dependencies automatically.
+`./install.sh` is interactive (colors + step progress), detects your OS, and installs host dependencies automatically.
 
 ## Install
 
