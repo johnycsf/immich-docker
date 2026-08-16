@@ -329,7 +329,7 @@ do_backup() {
   echo "==> Snapshot ${SNAP_NAME} -> ${SNAP_DIR}"
   echo "==> DB: logical PostgreSQL dump. Library: incremental rsync hardlinks."
 
-  if ! compose ps -q database 2>/dev/null | grep -q .; then
+  if ! compose_service_running database; then
     echo "database service not running — refusing backup." >&2
     rm -rf "${SNAP_DIR}"
     exit 1
