@@ -317,7 +317,7 @@ wait_immich_healthy() {
 }
 
 do_backup() {
-  need docker
+  need_container_engine
   need_rsync
   compose version >/dev/null
   [[ -n "$DEST" ]] || { echo "Provide --dest /path" >&2; exit 1; }
@@ -388,7 +388,7 @@ EOF
 }
 
 do_restore() {
-  need docker
+  need_container_engine
   need_rsync
   compose version >/dev/null
   [[ -n "$FROM" ]] || { echo "Provide --from /path" >&2; exit 1; }
@@ -424,9 +424,11 @@ EOF
   compose down
 
   echo "==> Restoring .env / compose..."
+  save_host_install_env
   [[ -f "${snap}/.env" ]] && cp -a "${snap}/.env" .env
   # shellcheck disable=SC1091
   set -a; source .env; set +a
+  apply_host_install_env
 
   echo "==> Restoring library..."
   mkdir -p data/library

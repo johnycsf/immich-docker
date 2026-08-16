@@ -108,8 +108,7 @@ create_backup() {
   echo "Backup ready: ${BACKUP_DIR}"
 }
 
-need docker
-compose version >/dev/null
+need_container_engine
 [[ -f .env ]] || { echo "No .env — Immich not configured here." >&2; exit 1; }
 
 create_backup
@@ -137,7 +136,7 @@ done
   exit 1
 }
 echo "==> Pruning dangling images only..."
-docker image prune -f
+container_image_prune
 
 echo
 echo "Update finished."

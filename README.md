@@ -148,7 +148,7 @@ Non-interactive: set the port variables in `.env` (or the environment) and use `
 
 ## Container engine
 
-During `./manage.sh` → Install you can choose **Docker** or **Podman**. The choice is saved as `CONTAINER_ENGINE` in `.env`. All manage actions (`update`, `backup`, `restore`, …) use that engine via a shared `compose` helper.
+During `./manage.sh` → Install you can choose **Docker** or **Podman**. The choice is saved as `CONTAINER_ENGINE` in `.env` and reused for every manage action (`update`, `backup`, `restore`, status, …) via a shared `compose` helper. Restore preserves that host choice (and host ports) even if the backup’s `.env` is older.
 
 ## Backup exports
 
