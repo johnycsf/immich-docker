@@ -139,6 +139,10 @@ This project is provided **as is**. The author is **not responsible** for any lo
 
 If you hit an error, please [open a GitHub Issue](../../issues/new/choose) and follow [CONTRIBUTING.md](CONTRIBUTING.md). Fixes via Pull Request are welcome. GitHub Issues/PRs are the supported way to report problems—there is no private support channel.
 
+## Interactive control center
+
+`./manage.sh` opens an **arrow-key menu** (↑↓ + Enter) powered by [gum](https://github.com/charmbracelet/gum). If gum isn’t installed yet, the script installs it automatically (or falls back to whiptail / a numbered list).
+
 ## Host ports
 
 During `./install.sh` (or Manage → Install / reconfigure), the script checks whether default host ports are free, lets you keep the defaults or choose different ports, and saves them in `.env`. Re-running install keeps your current ports unless you change them.
