@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Native ↑/↓ `>` menus in `./manage.sh` (replaced gum/whiptail chooser).
+
+- Optional compressed backup exports (`--archive tar.gz|tar.xz|zip`) with simple password protection; age remains available for strong crypto.
+
 - Arrow-key interactive menus in `./manage.sh` (gum; whiptail/numbered fallback).
 
 - Install prompts for host ports with conflict detection (keep defaults or choose custom).
