@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
-# First-run Immich install (interactive) — official images + Valkey + Immich Postgres.
+# First-run Immich install (interactive) — Docker or Podman Compose.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 # shellcheck source=scripts/deps.sh
 source "${ROOT}/scripts/deps.sh"
 
-ui_banner "Immich" "Docker Compose · official Immich images + Valkey + Postgres"
 ui_steps_init 5
-
 ui_step "Preparing configuration"
 if [[ ! -f .env ]]; then
   cp .env.example .env
@@ -18,6 +16,7 @@ else
 fi
 
 configure_container_engine
+ui_banner "Immich" "$(compose_stack_subtitle "official Immich images + Valkey + Postgres")"
 
 ui_step "Checking host dependencies"
 ensure_host_deps docker
