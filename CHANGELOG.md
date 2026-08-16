@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/) where tag
 
 - Standardized beginner-friendly install, update, and backup UX
 
+### Fixed
+
+- Custom `IMMICH_PORT` values now map host and container to the same port (Immich v3 listens on `IMMICH_PORT`; a host-only remap previously broke the API wait)
+- Compose project renamed to `immich-docker` and fixed `container_name`s removed so this stack can run beside another Immich install
+
 <!--
 ## [1.0.0] - YYYY-MM-DD
 ### Added

@@ -71,7 +71,7 @@ Edit `.env` (created from `.env.example`):
 
 | Variable | Purpose |
 |----------|---------|
-| `IMMICH_PORT` | Host port (default `2283`) |
+| `IMMICH_PORT` | Published + listen port (default `2283`; Immich binds to this inside the container) |
 | `IMMICH_VERSION` | Immich tag (default `v3`; pin e.g. `v3.1.0` if you prefer) |
 | `TZ` | Timezone |
 | `UPLOAD_LOCATION` | Photo library on disk (default `./data/library`) |

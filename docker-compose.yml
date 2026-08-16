@@ -5,11 +5,13 @@
 # Images are Immich’s official GHCR images + Valkey (Redis-compatible cache
 # Immich ships in their install guide — not a third-party Immich fork).
 #
-name: immich
+# Project name is intentionally NOT "immich" so this stack can run beside an
+# existing classic immich-app install (which uses container_name immich_*).
+#
+name: immich-docker
 
 services:
   immich-server:
-    container_name: immich_server
     image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-v3}
     volumes:
       - ${UPLOAD_LOCATION}:/data
@@ -17,7 +19,9 @@ services:
     env_file:
       - .env
     ports:
-      - '${IMMICH_PORT:-2283}:2283'
+      # Immich v3 binds to IMMICH_PORT inside the container (from env_file),
+      # so host and container ports must match.
+      - '${IMMICH_PORT:-2283}:${IMMICH_PORT:-2283}'
     depends_on:
       - redis
       - database
@@ -26,7 +30,6 @@ services:
       disable: false
 
   immich-machine-learning:
-    container_name: immich_machine_learning
     image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-v3}
     volumes:
       - ${MODEL_CACHE_LOCATION:-./data/model-cache}:/cache
@@ -37,7 +40,6 @@ services:
       disable: false
 
   redis:
-    container_name: immich_redis
     # Immich’s official compose uses Valkey (Redis protocol). Same role as Redis.
     image: docker.io/valkey/valkey:9
     volumes:
@@ -47,7 +49,6 @@ services:
     restart: unless-stopped
 
   database:
-    container_name: immich_postgres
     image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
