@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Install can choose **Docker** or **Podman** (`CONTAINER_ENGINE` in `.env`).
+
 - Manage menu includes **Restore** (backup root, snapshot, or archive).
 
 - Single entrypoint: `./manage.sh` (install/update/backup helpers moved under `scripts/`).

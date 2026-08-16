@@ -9,9 +9,6 @@ source "${ROOT}/scripts/deps.sh"
 ui_banner "Immich" "Docker Compose · official Immich images + Valkey + Postgres"
 ui_steps_init 5
 
-ui_step "Checking host dependencies"
-ensure_host_deps docker
-
 ui_step "Preparing configuration"
 if [[ ! -f .env ]]; then
   cp .env.example .env
@@ -19,6 +16,11 @@ if [[ ! -f .env ]]; then
 else
   ui_ok "Using existing .env"
 fi
+
+configure_container_engine
+
+ui_step "Checking host dependencies"
+ensure_host_deps docker
 
 configure_host_port IMMICH_PORT "Immich HTTP" 2283
 
@@ -39,10 +41,10 @@ fi
 mkdir -p data/library data/postgres data/model-cache data/redis
 
 ui_step "Pulling official Immich images"
-ui_run "docker compose pull" docker compose pull
+ui_run "compose pull" compose pull
 
 ui_step "Starting Immich stack"
-ui_run "docker compose up -d" docker compose up -d
+ui_run "compose up -d" compose up -d
 
 ui_step "Waiting for API"
 PORT="$(grep -E '^IMMICH_PORT=' .env | cut -d= -f2 || echo 2283)"
@@ -61,5 +63,5 @@ ui_info "2) Install the Immich mobile app and point it at that URL"
 ui_info "3) Later: ./manage.sh update   ·   ./manage.sh backup --dest /path/to/external-drive"
 if [[ "$ok" -ne 1 ]]; then
   ui_warn "API not ready yet — wait a minute and refresh the URL"
-  docker compose ps || true
+  compose ps || true
 fi

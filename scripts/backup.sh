@@ -7,6 +7,8 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
+# shellcheck source=scripts/deps.sh
+source "${ROOT}/scripts/deps.sh"
 # shellcheck source=scripts/backup-encrypt.sh
 source "${ROOT}/scripts/backup-encrypt.sh"
 STACK_ID="immich-docker"
@@ -36,7 +38,7 @@ Usage:
   --encrypt [--export-dir DIR] [--age-recipient R] [--passphrase]
 
 Fresh machine:
-  1) Place compose + .env here and docker compose up once (or restore .env from snapshot)
+  1) Place compose + .env here and compose up once (or restore .env from snapshot)
   2) ./manage.sh backup --restore --from /mnt/usb/immich-backups
 EOF
 }
@@ -310,14 +312,14 @@ wait_immich_healthy() {
     sleep 5
   done
   echo "Immich API did not become healthy in time." >&2
-  docker compose ps >&2 || true
+  compose ps >&2 || true
   return 1
 }
 
 do_backup() {
   need docker
   need_rsync
-  docker compose version >/dev/null
+  compose version >/dev/null
   [[ -n "$DEST" ]] || { echo "Provide --dest /path" >&2; exit 1; }
   [[ -f .env ]] || { echo "No .env found." >&2; exit 1; }
   DEST="$(mkdir -p "$DEST" && cd "$DEST" && pwd)"
@@ -325,7 +327,7 @@ do_backup() {
   echo "==> Snapshot ${SNAP_NAME} -> ${SNAP_DIR}"
   echo "==> DB: logical PostgreSQL dump. Library: incremental rsync hardlinks."
 
-  if ! docker compose ps -q database 2>/dev/null | grep -q .; then
+  if ! compose ps -q database 2>/dev/null | grep -q .; then
     echo "database service not running — refusing backup." >&2
     rm -rf "${SNAP_DIR}"
     exit 1
@@ -338,7 +340,7 @@ do_backup() {
   local dump="${SNAP_DIR}/immich-db.sql.gz"
   # shellcheck disable=SC1091
   set -a; source .env; set +a
-  docker compose exec -T database pg_dump \
+  compose exec -T database pg_dump \
     -U "${DB_USERNAME:-postgres}" \
     -d "${DB_DATABASE_NAME:-immich}" \
     --clean --if-exists \
@@ -388,7 +390,7 @@ EOF
 do_restore() {
   need docker
   need_rsync
-  docker compose version >/dev/null
+  compose version >/dev/null
   [[ -n "$FROM" ]] || { echo "Provide --from /path" >&2; exit 1; }
   local snap src
   src="$(prepare_restore_from_arg "$FROM")"
@@ -419,7 +421,7 @@ EOF
   fi
 
   echo "==> Stopping Immich..."
-  docker compose down
+  compose down
 
   echo "==> Restoring .env / compose..."
   [[ -f "${snap}/.env" ]] && cp -a "${snap}/.env" .env
@@ -456,25 +458,25 @@ EOF
     mkdir -p data/postgres
   fi
 
-  docker compose up -d database
+  compose up -d database
   echo "Waiting for Postgres..."
   local i
   for i in $(seq 1 60); do
-    if docker compose exec -T database pg_isready -U "${DB_USERNAME:-postgres}" >/dev/null 2>&1; then
+    if compose exec -T database pg_isready -U "${DB_USERNAME:-postgres}" >/dev/null 2>&1; then
       break
     fi
     sleep 2
   done
-  docker compose exec -T database pg_isready -U "${DB_USERNAME:-postgres}"
+  compose exec -T database pg_isready -U "${DB_USERNAME:-postgres}"
 
   if [[ -f "${snap}/immich-db.sql.gz" ]]; then
     if ! gzip -dc "${snap}/immich-db.sql.gz" \
-      | docker compose exec -T database psql -U "${DB_USERNAME:-postgres}" -d "${DB_DATABASE_NAME:-immich}"; then
+      | compose exec -T database psql -U "${DB_USERNAME:-postgres}" -d "${DB_DATABASE_NAME:-immich}"; then
       echo "SQL IMPORT FAILED — not starting Immich server." >&2
       exit 1
     fi
   else
-    if ! docker compose exec -T database psql -U "${DB_USERNAME:-postgres}" -d "${DB_DATABASE_NAME:-immich}" \
+    if ! compose exec -T database psql -U "${DB_USERNAME:-postgres}" -d "${DB_DATABASE_NAME:-immich}" \
         <"${snap}/immich-db.sql"; then
       echo "SQL IMPORT FAILED — not starting Immich server." >&2
       exit 1
@@ -484,9 +486,9 @@ EOF
   echo "==> Starting full stack..."
   export COMPOSE_HTTP_TIMEOUT="${COMPOSE_HTTP_TIMEOUT:-86400}"
   export DOCKER_CLIENT_TIMEOUT="${DOCKER_CLIENT_TIMEOUT:-86400}"
-  docker compose up -d --remove-orphans --wait --wait-timeout 3600 || docker compose up -d --remove-orphans
+  compose up -d --remove-orphans --wait --wait-timeout 3600 || compose up -d --remove-orphans
   wait_immich_healthy || true
-  docker compose ps
+  compose ps
   echo "Restore finished from ${snap}."
 }
 

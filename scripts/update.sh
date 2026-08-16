@@ -4,6 +4,8 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
+# shellcheck source=scripts/deps.sh
+source "${ROOT}/scripts/deps.sh"
 
 # Long client timeouts so cron never aborts mid-pull
 export COMPOSE_HTTP_TIMEOUT="${COMPOSE_HTTP_TIMEOUT:-86400}"
@@ -107,17 +109,17 @@ create_backup() {
 }
 
 need docker
-docker compose version >/dev/null
+compose version >/dev/null
 [[ -f .env ]] || { echo "No .env — Immich not configured here." >&2; exit 1; }
 
 create_backup
 
 echo "==> Pulling newer Immich images (waits until fully downloaded/extracted)..."
-docker compose pull
+compose pull
 echo "==> Recreating stack and waiting for healthy..."
-docker compose up -d --remove-orphans --wait --wait-timeout 3600
+compose up -d --remove-orphans --wait --wait-timeout 3600
 echo "==> Status:"
-docker compose ps
+compose ps
 echo "==> API check..."
 ok=0
 for i in $(seq 1 60); do
@@ -131,7 +133,7 @@ for i in $(seq 1 60); do
 done
 [[ "$ok" -eq 1 ]] || {
   echo "API not healthy after update." >&2
-  docker compose logs --tail=80 >&2 || true
+  compose logs --tail=80 >&2 || true
   exit 1
 }
 echo "==> Pruning dangling images only..."
