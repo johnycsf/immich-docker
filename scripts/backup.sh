@@ -428,11 +428,18 @@ EOF
 
   echo "==> Restoring library..."
   mkdir -p data/library
+  # Empty install often leaves root-owned Immich dirs; make them writable for rsync.
+  if command -v sudo >/dev/null 2>&1; then
+    sudo chown -R "$(id -u):$(id -g)" data/library 2>/dev/null || true
+  fi
   rsync -aH --delete --info=progress2 "${snap}/files/library/" data/library/
 
   if [[ -d "${snap}/files/model-cache" ]]; then
     echo "==> Restoring model-cache..."
     mkdir -p data/model-cache
+    if command -v sudo >/dev/null 2>&1; then
+      sudo chown -R "$(id -u):$(id -g)" data/model-cache 2>/dev/null || true
+    fi
     rsync -aH --delete "${snap}/files/model-cache/" data/model-cache/
   fi
 
