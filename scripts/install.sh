@@ -40,10 +40,10 @@ fi
 mkdir -p data/library data/postgres data/model-cache data/redis
 
 ui_step "Pulling official Immich images"
-ui_run "compose pull" compose pull
+ui_run --stream "compose pull" compose pull
 
 ui_step "Starting Immich stack"
-ui_run "compose up -d" compose up -d
+ui_run --stream "compose up -d" compose up -d
 
 # Library/model-cache are host-rsync targets. Do NOT chown postgres/redis after
 # start — container UIDs own those dirs (especially under rootless Podman).
