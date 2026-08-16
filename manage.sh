@@ -19,6 +19,7 @@ Usage:
   ./manage.sh install         Run install / reconfigure
   ./manage.sh update          Safe update (pre-backup)
   ./manage.sh backup [args]   Pass-through to scripts/backup.sh
+  ./manage.sh restore [path]  Restore from backup root/snapshot/archive
   ./manage.sh status|doctor   Health check
   ./manage.sh uninstall       Interactive uninstall
   ./manage.sh features        Show differentiators
@@ -33,6 +34,13 @@ case "${CMD}" in
   install) exec "${ROOT}/scripts/install.sh" "$@" ;;
   update) exec "${ROOT}/scripts/update.sh" "$@" ;;
   backup) exec "${ROOT}/scripts/backup.sh" "$@" ;;
+  restore)
+    if [[ $# -ge 1 ]]; then
+      exec "${ROOT}/scripts/backup.sh" --restore --from "$1"
+    fi
+    ui_ask from "Restore from (backup root, snapshot dir, or archive file)" "${ROOT}/backups"
+    exec "${ROOT}/scripts/backup.sh" --restore --from "${from}"
+    ;;
   status|doctor) doctor_docker "$TITLE" ;;
   uninstall) uninstall_docker_stack "$TITLE" ;;
   features) ui_banner "$TITLE" "Features"; print_homelab_features ;;
