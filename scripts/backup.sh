@@ -421,7 +421,7 @@ EOF
   fi
 
   echo "==> Stopping Immich..."
-  compose down
+  compose down || true
 
   echo "==> Restoring .env / compose..."
   save_host_install_env
