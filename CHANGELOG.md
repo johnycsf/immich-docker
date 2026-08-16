@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Fix root-owned data dirs after compose/restore so host rsync backup/restore works for all users.
+
 - Install can choose **Docker** or **Podman** (`CONTAINER_ENGINE` in `.env`).
 
 - Manage menu includes **Restore** (backup root, snapshot, or archive).

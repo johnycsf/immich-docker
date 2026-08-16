@@ -46,6 +46,8 @@ ui_run "compose pull" compose pull
 ui_step "Starting Immich stack"
 ui_run "compose up -d" compose up -d
 
+ensure_host_owned_dir data/library data/postgres data/model-cache data/redis
+
 ui_step "Waiting for API"
 PORT="$(grep -E '^IMMICH_PORT=' .env | cut -d= -f2 || echo 2283)"
 ok=0
