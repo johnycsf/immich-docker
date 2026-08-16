@@ -26,8 +26,8 @@ services:
       - redis
       - database
     restart: unless-stopped
-    healthcheck:
-      disable: false
+    # Do not set `healthcheck: disable: false` — Docker Compose treats that as
+    # "use image HEALTHCHECK", but Podman errors: must define a healthcheck command.
 
   immich-machine-learning:
     image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-v3}
@@ -36,8 +36,6 @@ services:
     env_file:
       - .env
     restart: unless-stopped
-    healthcheck:
-      disable: false
 
   redis:
     # Immich’s official compose uses Valkey (Redis protocol). Same role as Redis.
@@ -59,5 +57,3 @@ services:
       - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
     shm_size: 128mb
     restart: unless-stopped
-    healthcheck:
-      disable: false
