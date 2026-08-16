@@ -98,10 +98,12 @@ Roll back / disaster restore:
 
 ```bash
 # Prefer an external drive or NAS (libraries are large; hardlinks need one filesystem)
-./manage.sh backup --dest /mnt/usb/immich-docker-backups --keep 3
+./manage.sh backup --dest /mnt/backup --keep 3
+# → writes /mnt/backup/immich-docker/snapshots/...
 
 # Optional: also snapshot ML model cache
-./manage.sh backup --dest /mnt/usb/immich-docker-backups --keep 3 --include-model-cache
+./manage.sh backup --dest /mnt/backup --keep 3
+# → writes /mnt/backup/immich-docker/snapshots/... --include-model-cache
 
 # On a new machine after ./manage.sh (or with compose present):
 ./manage.sh backup --restore --from /mnt/usb/immich-docker-backups
