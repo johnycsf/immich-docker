@@ -103,6 +103,10 @@ rm -rf data
 - Follow Immich release notes when jumping major versions.
 - Hardware acceleration for ML/transcoding is optional; see Immich docs and the commented `hwaccel` examples in upstream compose if you need them later.
 
+## Credits
+
+This repo packages or configures upstream software. See [CREDITS.md](CREDITS.md) for the main developers and projects this work builds on.
+
 ## Disclaimer
 
 This project is provided **as is**. The author is **not responsible** for any loss, damage, data corruption, downtime, security issues, or other consequences from using it. Full text: [DISCLAIMER.md](DISCLAIMER.md).
