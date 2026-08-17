@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Control center for Immich (Docker or Podman) — install, update, backup, status, uninstall.
+# Control center for Immich (Docker or Podman) - install, update, backup, status, uninstall.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
@@ -12,7 +12,7 @@ shift || true
 
 usage() {
   cat <<EOF
-${UI_BOLD}${TITLE} · manage.sh${UI_RESET}
+${UI_BOLD}${TITLE} - manage.sh${UI_RESET}
 
 Usage:
   ./manage.sh                 Interactive menu

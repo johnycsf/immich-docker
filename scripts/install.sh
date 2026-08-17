@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# First-run Immich install (interactive) — Docker or Podman Compose.
+# First-run Immich install (interactive) - Docker or Podman Compose.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
@@ -28,7 +28,7 @@ if grep -q '^DB_PASSWORD=CHANGE_ME' .env; then
   sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=${PASS}|" .env
   ui_ok "Generated DB_PASSWORD in .env (keep this file private)"
 else
-  ui_ok "DB_PASSWORD already set — leaving it alone"
+  ui_ok "DB_PASSWORD already set - leaving it alone"
 fi
 
 if grep -q '^TZ=America/New_York' .env && [[ -f /etc/timezone ]]; then
@@ -46,7 +46,7 @@ ui_step "Starting Immich stack"
 ui_run --stream "compose up -d" compose up -d
 
 # Library/model-cache are host-rsync targets. Do NOT chown postgres/redis after
-# start — container UIDs own those dirs (especially under rootless Podman).
+# start - container UIDs own those dirs (especially under rootless Podman).
 ensure_host_owned_dir data/library data/model-cache
 
 ui_step "Waiting for API"
@@ -63,8 +63,8 @@ ui_ok "Immich is starting"
 ui_info "Open: ${UI_BOLD}http://${IP}:${PORT}${UI_RESET}"
 ui_info "1) Create your admin account"
 ui_info "2) Install the Immich mobile app and point it at that URL"
-ui_info "3) Later: ./manage.sh update   ·   ./manage.sh backup --dest /path/to/external-drive"
+ui_info "3) Later: ./manage.sh update   -   ./manage.sh backup --dest /path/to/external-drive"
 if [[ "$ok" -ne 1 ]]; then
-  ui_warn "API not ready yet — wait a minute and refresh the URL"
+  ui_warn "API not ready yet - wait a minute and refresh the URL"
   compose ps || true
 fi

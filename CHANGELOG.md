@@ -24,6 +24,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/) where tagged releases exist.
 
 ## [Unreleased]
+- Fix rootless Podman host-port remap writing the notice text into `.env` instead of the port number.
+- Fix `ensure_host_owned_dir` silently skipping ownership repair when nested files were wrong (`find|head` SIGPIPE under `pipefail`).
+- Shell scripts are now pure ASCII; displayed glyphs come from `$'\uXXXX'` constants so editors cannot corrupt the UI. Terminal output is unchanged.
+- Fix `compose_service_running` matching containers by the compose `working_dir` label, so backups work when the repo is cloned under a different directory name.
+- Skip `--wait`/`--wait-timeout` on podman-compose during update and restore (unsupported; the update aborted before the API check).
+- Refuse a host port another stack beside this one already claims in its `.env` (catches installed-but-stopped stacks) and offer the next free port.
 - Rootless Podman: remap privileged host ports (e.g. 80) to unprivileged defaults (8080) so install can bind.
 - Document batching related fixes into one `testing` → `main` PR (avoid one-PR-per-microfix).
 - Fix backup dump verification under `pipefail` (gzip|head SIGPIPE looked like a bad dump).

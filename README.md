@@ -148,6 +148,20 @@ During `./manage.sh` (or Manage → Install / reconfigure), the script checks wh
 
 Non-interactive: set the port variables in `.env` (or the environment) and use `SKIP_PORT_PROMPTS=1`.
 
+Defaults are kept unique across the johnycsf stacks so you can run several on one host without a clash:
+
+| Stack | Variable | Default host port |
+|-------|----------|-------------------|
+| `heimdall-docker` | `HTTP_PORT` | `8080` |
+| `vaultwarden-docker` | `PORT` | `8081` |
+| `nextcloud-office-docker` | `NEXTCLOUD_PORT` | `8082` |
+| `nextcloud-office-docker` | `COLLABORA_PORT` | `9980` |
+| `immich-docker` | `IMMICH_PORT` | `2283` |
+
+Install also refuses a port another stack checked out beside this one already claims in its `.env` — even when that stack is stopped — and offers the next free port instead.
+
+All defaults are `>= 1024` because **rootless Podman cannot publish privileged ports** (`80`, `443`). On Docker you may still set `HTTP_PORT=80` if you want.
+
 ## Container engine
 
 During `./manage.sh` → Install you can choose **Docker** or **Podman**. The choice is saved as `CONTAINER_ENGINE` in `.env` and reused for every manage action (`update`, `backup`, `restore`, status, …) via a shared `compose` helper. Restore preserves that host choice (and host ports) even if the backup’s `.env` is older.
