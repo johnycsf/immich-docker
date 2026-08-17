@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/) where tagged releases exist.
 
 ## [Unreleased]
+- Open the host firewall port on **ufw** hosts (Ubuntu/Debian/Mint) during install, not just firewalld. Previously the install finished and the app answered on localhost while every other machine on the LAN was blocked, which looks like a failed install.
 - Fix rootless Podman host-port remap writing the notice text into `.env` instead of the port number.
 - Fix `ensure_host_owned_dir` silently skipping ownership repair when nested files were wrong (`find|head` SIGPIPE under `pipefail`).
 - Shell scripts are now pure ASCII; displayed glyphs come from `$'\uXXXX'` constants so editors cannot corrupt the UI. Terminal output is unchanged.
