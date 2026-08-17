@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/) where tagged releases exist.
 
 ## [Unreleased]
+- Rootless Podman: remap privileged host ports (e.g. 80) to unprivileged defaults (8080) so install can bind.
 - Document batching related fixes into one `testing` → `main` PR (avoid one-PR-per-microfix).
 - Fix backup dump verification under `pipefail` (gzip|head SIGPIPE looked like a bad dump).
 - Fix Podman backup/status: detect running services without `compose ps -q SERVICE` (unsupported by podman-compose).
