@@ -52,7 +52,7 @@ ask_backup_retention() {
   local dir="$1"
   [[ -n "$dir" && -e "$dir" ]] || return 0
   if [[ ! -t 0 ]]; then
-    echo "No interactive terminal — keeping backup at ${dir}"
+    echo "No interactive terminal - keeping backup at ${dir}"
     local keep="${DEFAULT_KEEP}"
     [[ -f "${KEEP_FILE}" ]] && keep="$(tr -dc '0-9' <"${KEEP_FILE}" || true)"
     [[ -z "${keep}" ]] && keep="${DEFAULT_KEEP}"
@@ -109,14 +109,20 @@ create_backup() {
 }
 
 need_container_engine
-[[ -f .env ]] || { echo "No .env — Immich not configured here." >&2; exit 1; }
+[[ -f .env ]] || { echo "No .env - Immich not configured here." >&2; exit 1; }
 
 create_backup
 
 echo "==> Pulling newer Immich images (waits until fully downloaded/extracted)..."
 compose pull
 echo "==> Recreating stack and waiting for healthy..."
-compose up -d --remove-orphans --wait --wait-timeout 3600
+# podman-compose has no --wait/--wait-timeout; passing them aborts the update.
+# The API check below is the readiness gate on that engine.
+if [[ "${CONTAINER_ENGINE:-docker}" == podman ]]; then
+  compose up -d --remove-orphans
+else
+  compose up -d --remove-orphans --wait --wait-timeout 3600
+fi
 echo "==> Status:"
 compose ps
 echo "==> API check..."

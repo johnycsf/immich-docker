@@ -263,7 +263,7 @@ verify_snapshot_integrity() {
   local warn=0
   echo "==> Checking snapshot integrity..."
   if [[ ! -f "${snap}/SHA256SUMS" ]]; then
-    echo "WARNING: No SHA256SUMS — cannot verify dump/config integrity." >&2
+    echo "WARNING: No SHA256SUMS - cannot verify dump/config integrity." >&2
     warn=1
   elif command -v sha256sum >/dev/null 2>&1; then
     set +e
@@ -272,7 +272,7 @@ verify_snapshot_integrity() {
     rc=$?
     set -e
     if [[ "$rc" -ne 0 ]]; then
-      echo "WARNING: SHA256 verification FAILED for dump/config — integrity may be lost; restore may cause issues." >&2
+      echo "WARNING: SHA256 verification FAILED for dump/config - integrity may be lost; restore may cause issues." >&2
       printf '%s\n' "$out" | grep -v ': OK$' | head -n 40 >&2 || true
       warn=1
     fi
@@ -280,7 +280,7 @@ verify_snapshot_integrity() {
     expected="$(grep -E '^snapshot_sha256=' "${snap}/META.txt" 2>/dev/null | cut -d= -f2- || true)"
     actual="$(sha256_file "${snap}/SHA256SUMS")"
     if [[ -n "$expected" && "$expected" != "unavailable" && "$actual" != "$expected" ]]; then
-      echo "WARNING: SHA256SUMS does not match META snapshot_sha256 — integrity may be lost." >&2
+      echo "WARNING: SHA256SUMS does not match META snapshot_sha256 - integrity may be lost." >&2
       warn=1
     fi
   fi
@@ -289,7 +289,7 @@ verify_snapshot_integrity() {
     expected_fp="$(cat "${snap}/LIBRARY_FINGERPRINT")"
     actual_fp="$(find "${snap}/files/library" -type f -printf '%s\t%p\n' 2>/dev/null | sort | sha256sum | awk '{print $1}')"
     if [[ "$actual_fp" != "$expected_fp" ]]; then
-      echo "WARNING: Library inventory fingerprint mismatch — files may have changed or been corrupted in transit." >&2
+      echo "WARNING: Library inventory fingerprint mismatch - files may have changed or been corrupted in transit." >&2
       warn=1
     else
       echo "    Library fingerprint OK."
@@ -333,7 +333,7 @@ do_backup() {
   echo "==> DB: logical PostgreSQL dump. Library: incremental rsync hardlinks."
 
   if ! compose_service_running database; then
-    echo "database service not running — refusing backup." >&2
+    echo "database service not running - refusing backup." >&2
     rm -rf "${SNAP_DIR}"
     exit 1
   fi
@@ -358,13 +358,13 @@ do_backup() {
   local upload_rel="${UPLOAD_LOCATION:-./data/library}"
   local upload_path model_rel model_path
   upload_path="$(resolve_repo_path "${upload_rel}")"
-  echo "==> Syncing photo library (${upload_rel}) — may take a while on first run..."
+  echo "==> Syncing photo library (${upload_rel}) - may take a while on first run..."
   local prev_lib=""
   [[ -n "${PREV_LINK}" && -d "${PREV_LINK}/files/library" ]] && prev_lib="${PREV_LINK}/files/library"
   if [[ -d "${upload_path}" ]]; then
     rsync_incremental "${upload_path}" "${SNAP_DIR}/files/library" "${prev_lib}"
   else
-    echo "${upload_rel} missing — refusing incomplete backup." >&2
+    echo "${upload_rel} missing - refusing incomplete backup." >&2
     exit 1
   fi
 
@@ -490,13 +490,13 @@ EOF
   if [[ -f "${snap}/immich-db.sql.gz" ]]; then
     if ! gzip -dc "${snap}/immich-db.sql.gz" \
       | compose exec -T database psql -U "${DB_USERNAME:-postgres}" -d "${DB_DATABASE_NAME:-immich}"; then
-      echo "SQL IMPORT FAILED — not starting Immich server." >&2
+      echo "SQL IMPORT FAILED - not starting Immich server." >&2
       exit 1
     fi
   else
     if ! compose exec -T database psql -U "${DB_USERNAME:-postgres}" -d "${DB_DATABASE_NAME:-immich}" \
         <"${snap}/immich-db.sql"; then
-      echo "SQL IMPORT FAILED — not starting Immich server." >&2
+      echo "SQL IMPORT FAILED - not starting Immich server." >&2
       exit 1
     fi
   fi
@@ -504,7 +504,12 @@ EOF
   echo "==> Starting full stack..."
   export COMPOSE_HTTP_TIMEOUT="${COMPOSE_HTTP_TIMEOUT:-86400}"
   export DOCKER_CLIENT_TIMEOUT="${DOCKER_CLIENT_TIMEOUT:-86400}"
-  compose up -d --remove-orphans --wait --wait-timeout 3600 || compose up -d --remove-orphans
+  # podman-compose rejects --wait/--wait-timeout; skip them instead of failing first.
+  if [[ "${CONTAINER_ENGINE:-docker}" == podman ]]; then
+    compose up -d --remove-orphans
+  else
+    compose up -d --remove-orphans --wait --wait-timeout 3600 || compose up -d --remove-orphans
+  fi
   wait_immich_healthy || true
   compose ps
   echo "Restore finished from ${snap}."
