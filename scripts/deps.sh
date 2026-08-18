@@ -411,8 +411,24 @@ host_firewall_backend() {
   # Echo the active host firewall: firewalld | ufw | unknown | none
   # "unknown" means a firewall is installed but its state could not be read.
   local state
-  if command -v firewall-cmd >/dev/null 2>&1 && firewall-cmd --state >/dev/null 2>&1; then
-    printf 'firewalld\n'
+  if command -v firewall-cmd >/dev/null 2>&1; then
+    # Try unprivileged query first
+    if firewall-cmd --state >/dev/null 2>&1; then
+      printf 'firewalld\n'
+      return 0
+    fi
+    # Try non-interactive sudo (avoid prompting here)
+    if command -v sudo >/dev/null 2>&1 && sudo -n firewall-cmd --state >/dev/null 2>&1; then
+      printf 'firewalld\n'
+      return 0
+    fi
+    # Fall back to systemctl if available (service is active but firewall-cmd couldn't be queried)
+    if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet firewalld; then
+      printf 'firewalld\n'
+      return 0
+    fi
+    # We know firewalld is installed but couldn't read state without privileges
+    printf 'unknown\n'
     return 0
   fi
   if command -v ufw >/dev/null 2>&1; then
