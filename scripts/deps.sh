@@ -499,6 +499,15 @@ ensure_host_firewall_tcp_port() {
         ui_info "Attempting: sudo nft add rule inet filter input tcp dport ${port} accept"
         if sudo nft add rule inet filter input tcp dport "${port}" accept >/dev/null 2>&1; then
           ui_ok "Opened ${port}/tcp via nft (temporary)."
+          ui_ask_yn _persist "Make nft rule persistent across reboots (save to /etc/nftables.conf)?" n
+          if [[ "${_persist}" == "y" ]]; then
+            ui_info "Saving nft ruleset to /etc/nftables.conf (may require sudo)."
+            if sudo sh -c 'cp -n /etc/nftables.conf /etc/nftables.conf.bak 2>/dev/null || true' && sudo sh -c 'nft list ruleset > /etc/nftables.conf' >/dev/null 2>&1; then
+              ui_ok "Saved nft ruleset to /etc/nftables.conf"
+            else
+              ui_err "Failed to save nft ruleset. To persist manually run: sudo nft list ruleset > /etc/nftables.conf"
+            fi
+          fi
           return 0
         fi
       fi
