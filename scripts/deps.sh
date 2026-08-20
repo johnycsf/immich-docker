@@ -1247,7 +1247,14 @@ configure_container_engine() {
   fi
 }
 
+_deps_ensure_podman_restart_on_boot() {
+  # Rootless Podman will not start containers after a reboot unless this unit is enabled.
+  command -v systemctl >/dev/null 2>&1 || return 0
+  systemctl --user enable --now podman-restart.service >/dev/null 2>&1 || true
+}
+
 _deps_ensure_podman_api() {
+  _deps_ensure_podman_restart_on_boot
   # docker-compose invoked via `podman compose` talks to the Podman API socket.
   # Rootless installs need the user socket (and often linger for SSH/non-login sessions).
   local sock="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/podman/podman.sock"

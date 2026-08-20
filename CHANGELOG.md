@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Set Compose `restart: always` and enable `podman-restart.service` so rootless Podman brings containers back after a host reboot.
+
 - Fix root-owned data dirs after compose/restore so host rsync backup/restore works for all users.
 
 - Install can choose **Docker** or **Podman** (`CONTAINER_ENGINE` in `.env`).
