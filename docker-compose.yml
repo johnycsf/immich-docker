@@ -31,6 +31,8 @@ services:
 
   immich-machine-learning:
     image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-v3}
+    environment:
+      IMMICH_PORT: 3003
     volumes:
       - ${MODEL_CACHE_LOCATION:-./data/model-cache}:/cache
     env_file:
