@@ -78,6 +78,18 @@ Edit `.env` (created from `.env.example`):
 | `DB_DATA_LOCATION` | Postgres files (default `./data/postgres`) |
 | `DB_PASSWORD` | Database password (auto-generated; alphanumeric only) |
 
+## Fix greyed-out or broken library assets
+
+If photos/videos appear greyed out, the mobile app shows upload errors, or logs mention missing thumbnails / video metadata, use the standalone repair tool (included in the clone — **not** part of `./manage.sh`):
+
+```bash
+chmod +x fix-library/fix-library.sh
+./fix-library/fix-library.sh scan
+./fix-library/fix-library.sh fix --apply --wait-metadata
+```
+
+See [fix-library/README.md](fix-library/README.md). Back up first: `./manage.sh backup --dest ./backups`.
+
 ## Update
 
 ```bash
