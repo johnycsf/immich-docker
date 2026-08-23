@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Add standalone `fix-library/` tool to scan and repair greyed-out assets, corrupt uploads, and missing video metadata (not part of `manage.sh`).
+
 - Pin `IMMICH_PORT: 3003` in `immich-machine-learning` compose environment to prevent ML worker from inheriting customized server ports and breaking machine learning endpoints.
 
 - Set Compose `restart: always` and enable `podman-restart.service` so rootless Podman brings containers back after a host reboot.
