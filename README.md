@@ -1,26 +1,27 @@
 # immich-docker
 
-![Repobeats analytics image](https://repobeats.axiom.co/api/embed/6eb113db43e751a25bbb31fc7f828245cf261118.svg "Repobeats analytics image")
-
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/johnycsf)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Issues](https://img.shields.io/badge/issues-welcome-lightgrey.svg)](../../issues/new/choose)
 
-Deploy [Immich](https://immich.app/) (self-hosted photo and video backup) with Docker Compose.
+One-command Immich for homelab beginners — official images, backup-before-update.
 
-Kubernetes version: [immich-k8s](https://github.com/johnycsf/immich-k8s)
+![`./manage.sh` control center](docs/manage-demo.gif)
+
+## Install
+
+```bash
+git clone https://github.com/johnycsf/immich-docker.git
+cd immich-docker
+chmod +x manage.sh
+./manage.sh
+```
+
+`./manage.sh` opens a **↑/↓ menu** with a `>` cursor (j/k and Enter also work). Open the URL the script prints, create your admin account, then use the Immich mobile apps.
 
 Uses **Immich’s official images** from GHCR (`immich-server`, `immich-machine-learning`, Immich Postgres with VectorChord) plus **Valkey** — the Redis-compatible cache Immich ships in their [official install compose](https://docs.immich.app/install/docker-compose). No LinuxServer or unofficial Immich forks.
 
-**One-command Immich for homelab beginners** — official images, interactive install, safe updates & backups.
-
-> **Choose your path:** **Docker Compose (this repo)** · [Kubernetes](https://github.com/johnycsf/immich-k8s)
-
-## Who this is for
-
-**Good fit:** homelab beginners who want Immich with official images and a guided install/update/backup flow.
-
-**Not for:** production multi-tenant photo hosting, or forks/unofficial Immich images — this stack sticks to Immich’s official GHCR images.
+Kubernetes version: [immich-k8s](https://github.com/johnycsf/immich-k8s)
 
 ## Why this repo (not just another compose file)
 
@@ -31,41 +32,11 @@ Uses **Immich’s official images** from GHCR (`immich-server`, `immich-machine-
 - Incremental hardlink **`./manage.sh backup`** + restore
 - **Official upstream images only**
 
-## Support this work
-
-**If this project helped you — or saved you hours of setup — please consider [sponsoring or donating](https://github.com/sponsors/johnycsf).** These repos stay free and maintained because people like you chip in.
-
-Your sponsorship funds:
-
-- Keeping install, update, and backup scripts working across common Linux distros (and macOS where supported)
-- Testing safe upgrades against **official** upstream images before you run them
-- Building more beginner-friendly homelab stacks with the same `./manage.sh` experience
-
-[![Sponsor johnycsf](https://img.shields.io/badge/GitHub%20Sponsors-Donate-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/johnycsf)
-
-👉 **[github.com/sponsors/johnycsf](https://github.com/sponsors/johnycsf)** — even a small monthly sponsorship helps keep development going.
-
 ## What you need
 
 - A Linux host (Debian/Ubuntu, Fedora/RHEL, Arch, openSUSE, Alpine) or macOS with Homebrew
 - `sudo` so `./manage.sh` can install missing tools (Docker, curl, openssl, rsync, …)
 - Enough disk for your data
-
-`./manage.sh` is interactive (colors + step progress), detects your OS, and installs host dependencies automatically.
-
-## Install
-
-```bash
-git clone https://github.com/johnycsf/immich-docker.git
-cd immich-docker
-chmod +x manage.sh
-./manage.sh          # interactive control center
-# or: ./manage.sh
-```
-
-Open the URL the script prints, create your admin account, then use the Immich mobile apps.
-
-Liked the install? Star the repo or [sponsor johnycsf](https://github.com/sponsors/johnycsf) so more stacks stay maintained.
 
 ## Customize
 
@@ -80,18 +51,6 @@ Edit `.env` (created from `.env.example`):
 | `DB_DATA_LOCATION` | Postgres files (default `./data/postgres`) |
 | `DB_PASSWORD` | Database password (auto-generated; alphanumeric only) |
 
-## Fix greyed-out or broken library assets
-
-If photos/videos appear greyed out, the mobile app shows upload errors, or logs mention missing thumbnails / video metadata, use the standalone repair tool (included in the clone — **not** part of `./manage.sh`):
-
-```bash
-chmod +x fix-library/fix-library.sh
-./fix-library/fix-library.sh scan
-./fix-library/fix-library.sh fix --apply --wait-metadata
-```
-
-See [fix-library/README.md](fix-library/README.md). Back up first: `./manage.sh backup --dest ./backups`.
-
 ## Update
 
 ```bash
@@ -100,27 +59,24 @@ See [fix-library/README.md](fix-library/README.md). Back up first: `./manage.sh 
 
 Before updating, the script runs `./manage.sh backup` into `./backups` (Postgres dump + incremental library hardlinks). Afterward it asks whether to keep that snapshot and how many copies to retain.
 
-Roll back / disaster restore:
+## Backup and restore
+
+Prefer an external drive or NAS (libraries are large; hardlinks need one filesystem):
 
 ```bash
-./manage.sh backup --restore --from ./backups
-# or from an external copy:
-./manage.sh backup --restore --from /mnt/usb/immich-backups
+./manage.sh backup --dest /mnt/backup --keep 3
+# optional: also snapshot ML model cache
+./manage.sh backup --dest /mnt/backup --keep 3 --include-model-cache
 ```
 
-## Disaster recovery (full backup / restore)
+Each run writes `/mnt/backup/immich-docker/snapshots/...`.
+
+Restore (this machine or a new one after `./manage.sh` / with compose present):
 
 ```bash
-# Prefer an external drive or NAS (libraries are large; hardlinks need one filesystem)
-./manage.sh backup --dest /mnt/backup --keep 3
-# → writes /mnt/backup/immich-docker/snapshots/...
-
-# Optional: also snapshot ML model cache
-./manage.sh backup --dest /mnt/backup --keep 3
-# → writes /mnt/backup/immich-docker/snapshots/... --include-model-cache
-
-# On a new machine after ./manage.sh (or with compose present):
 ./manage.sh backup --restore --from /mnt/usb/immich-docker-backups
+# or a local snapshot tree:
+./manage.sh backup --restore --from ./backups
 ```
 
 Each snapshot includes `SHA256SUMS` / `snapshot_sha256` for dumps and config. The photo library uses a fast size+path fingerprint (full per-file hashing of hundreds of GB would thrash the disk). Restore **warns** if integrity looks wrong but does not abort.
@@ -135,26 +91,12 @@ docker compose down
 rm -rf data
 ```
 
+Or use **Uninstall** in `./manage.sh`.
+
 ## Notes
 
 - Follow Immich release notes when jumping major versions.
 - Hardware acceleration for ML/transcoding is optional; see Immich docs and the commented `hwaccel` examples in upstream compose if you need them later.
-
-## Credits
-
-This repo packages or configures upstream software. See [CREDITS.md](CREDITS.md) for the main developers and projects this work builds on.
-
-## Disclaimer
-
-This project is provided **as is**. The author is **not responsible** for any loss, damage, data corruption, downtime, security issues, or other consequences from using it. Full text: [DISCLAIMER.md](DISCLAIMER.md).
-
-## Bug reports & contributions
-
-If you hit an error, please [open a GitHub Issue](../../issues/new/choose) and follow [CONTRIBUTING.md](CONTRIBUTING.md). Fixes via Pull Request are welcome. GitHub Issues/PRs are the supported way to report problems—there is no private support channel.
-
-## Interactive control center
-
-`./manage.sh` opens a simple **↑/↓ menu** with a `>` cursor (j/k and Enter also work). No extra packages required.
 
 ## Host ports
 
@@ -186,6 +128,32 @@ During `./manage.sh` → Install you can choose **Docker** or **Podman**. The ch
 
 Local snapshots stay as incremental hardlink trees (fast rollback). Optionally create a compressed offsite copy with `./manage.sh backup --dest ./backups --archive tar.gz|tar.xz|zip` (add `--archive-password` for zip password or age-passphrase on tar). For stronger key-based encryption use `--encrypt` (age). See repo-framework `docs/BACKUP_ENCRYPTION.md`.
 
+## Fix greyed-out or broken library assets
+
+If photos/videos appear greyed out, the mobile app shows upload errors, or logs mention missing thumbnails / video metadata, use the standalone repair tool (included in the clone — **not** part of `./manage.sh`):
+
+```bash
+chmod +x fix-library/fix-library.sh
+./fix-library/fix-library.sh scan
+./fix-library/fix-library.sh fix --apply --wait-metadata
+```
+
+See [fix-library/README.md](fix-library/README.md). Back up first: `./manage.sh backup --dest ./backups`.
+
+## Credits
+
+This repo packages or configures upstream software. See [CREDITS.md](CREDITS.md) for the main developers and projects this work builds on.
+
+## Disclaimer
+
+This project is provided **as is**. The author is **not responsible** for any loss, damage, data corruption, downtime, security issues, or other consequences from using it. Full text: [DISCLAIMER.md](DISCLAIMER.md).
+
+## Bug reports & contributions
+
+If you hit an error, please [open a GitHub Issue](../../issues/new/choose) and follow [CONTRIBUTING.md](CONTRIBUTING.md). Fixes via Pull Request are welcome. GitHub Issues/PRs are the supported way to report problems—there is no private support channel.
+
 ## Security
 
 See [SECURITY.md](SECURITY.md) for how to report vulnerabilities.
+
+Sponsorship funds testing and maintenance: [github.com/sponsors/johnycsf](https://github.com/sponsors/johnycsf).

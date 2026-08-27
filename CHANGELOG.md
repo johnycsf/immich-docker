@@ -1,5 +1,7 @@
 ## Unreleased
 
+- README leads with the `./manage.sh` control-center demo GIF and a one-line pitch; sponsor sales copy is reduced to a header badge plus one closing line.
+
 - Add standalone `fix-library/` tool to scan and repair greyed-out assets, corrupt uploads, and missing video metadata (not part of `manage.sh`).
 
 - Pin `IMMICH_PORT: 3003` in `immich-machine-learning` compose environment to prevent ML worker from inheriting customized server ports and breaking machine learning endpoints.
