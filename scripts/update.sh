@@ -6,6 +6,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 # shellcheck source=scripts/deps.sh
 source "${ROOT}/scripts/deps.sh"
+ui_style_task_output
 
 # Long client timeouts so cron never aborts mid-pull
 export COMPOSE_HTTP_TIMEOUT="${COMPOSE_HTTP_TIMEOUT:-86400}"
