@@ -19,7 +19,7 @@ configure_container_engine
 ui_banner "Immich" "$(compose_stack_subtitle "official Immich images + Valkey + Postgres")"
 
 ui_step "Checking host dependencies"
-ensure_host_deps docker
+ensure_host_deps docker age zip unzip xz
 
 configure_host_port IMMICH_PORT "Immich HTTP" 2283
 

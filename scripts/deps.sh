@@ -139,6 +139,24 @@ ui_ok() { echo "${UI_GREEN}${UI_SYM_OK}${UI_RESET} $*"; }
 ui_warn() { echo "${UI_YELLOW}${UI_SYM_WARN}${UI_RESET} $*" >&2; }
 ui_err() { echo "${UI_RED}${UI_SYM_ERR}${UI_RESET} $*" >&2; }
 
+# Apply the menu's visual language to task-script status messages.  Other
+# output stays byte-for-byte unchanged so it remains safe for command capture.
+ui_style_task_output() {
+  echo() {
+    if [[ "$#" -eq 1 ]]; then
+      case "$1" in
+        "==> "*) builtin echo "${UI_BLUE}${UI_BOLD}${UI_SYM_STEP}${UI_RESET} ${UI_BOLD}${1#==> }${UI_RESET}" ;;
+        "WARNING:"*) builtin echo "${UI_YELLOW}${UI_SYM_WARN}${UI_RESET} ${1#WARNING: }" >&2 ;;
+        "Backup OK."*|"Backup ready:"*|"Backup kept."|"Backup deleted."|"Snapshot ready:"*|"Latest pointer:"*|"API healthy."|"Integrity OK."|"Library fingerprint OK."|"Update finished."|"Restore finished from "*|"Archive OK:"*|"Encrypted export OK:"*) builtin echo "${UI_GREEN}${UI_SYM_OK}${UI_RESET} $1" ;;
+        "Missing "*|"No .env"*|"No usable snapshot"*|"Not found:"*|"Unknown "*|"Provide "*|"Need "*|"Empty dump:"*|"PostgreSQL dump "*|"SQL IMPORT FAILED"*|"API not healthy"*|"database service not running"*|"Archive missing"*|"Unsupported archive"*|"age encryption failed."|"Decrypted archive missing"*) builtin echo "${UI_RED}${UI_SYM_ERR}${UI_RESET} $1" >&2 ;;
+        *) builtin echo "$@" ;;
+      esac
+    else
+      builtin echo "$@"
+    fi
+  }
+}
+
 ui_ask() {
   # ui_ask VAR "Prompt" "default"
   local __var="$1" __prompt="$2" __def="${3:-}" __ans
@@ -1899,6 +1917,18 @@ ${UI_BOLD}What makes this stack different${UI_RESET}
 EOF
 }
 
+doctor_backup_tooling() {
+  local cmd
+  ui_step "Backup and restore tools"
+  for cmd in rsync age zip unzip xz; do
+    if command -v "${cmd}" >/dev/null 2>&1; then
+      ui_ok "${cmd} available"
+    else
+      ui_warn "${cmd} missing - re-run ./manage.sh install"
+    fi
+  done
+}
+
 doctor_docker() {
   local title="${1:-App}"
   load_container_engine
@@ -1928,6 +1958,8 @@ doctor_docker() {
   else
     ui_warn "Could not query compose status (is the stack installed?)"
   fi
+
+  doctor_backup_tooling
 
   echo
   ui_step "Disk (data/)"
@@ -1979,6 +2011,8 @@ doctor_k8s() {
   else
     ui_warn "Namespace ${ns} not found - run ./manage.sh"
   fi
+
+  doctor_backup_tooling
 
   echo
   ui_step "Saved install choices"
