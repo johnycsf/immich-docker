@@ -2,6 +2,10 @@
 
 Thanks for wanting to help. These projects are meant to stay simple for homelab beginners.
 
+## Fixed something? Send it back
+
+These setups are free to use, fork, and adapt. If you fix a bug or get something working on your system, please open a pull request with the fix (see "How to contribute" below) so the next person benefits too. Even a small fix helps — don't keep it to yourself.
+
 ## Disclaimer
 
 See [DISCLAIMER.md](DISCLAIMER.md). By using or contributing to this repository, you acknowledge that the author is **not responsible** for any damage, data loss, outages, security issues, or other consequences from using this software.
